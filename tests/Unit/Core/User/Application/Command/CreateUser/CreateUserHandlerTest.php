@@ -11,6 +11,8 @@ use PHPUnit\Framework\TestCase;
 
 class CreateUserHandlerTest extends TestCase
 {
+    private const TEST_EMAIL = 'test@test.pl';
+
     private UserRepositoryInterface|MockObject $userRepository;
 
     private CreateUserHandler $handler;
@@ -29,7 +31,7 @@ class CreateUserHandlerTest extends TestCase
 
     public function test_handle_success(): void
     {
-        $user = new User('test@test.pl');
+        $user = new User(self::TEST_EMAIL);
 
         $this->userRepository->expects(self::once())
             ->method('save')
@@ -38,6 +40,6 @@ class CreateUserHandlerTest extends TestCase
         $this->userRepository->expects(self::once())
             ->method('flush');
 
-        $this->handler->__invoke((new CreateUserCommand('test@test.pl')));
+        $this->handler->__invoke((new CreateUserCommand(self::TEST_EMAIL)));
     }
 }

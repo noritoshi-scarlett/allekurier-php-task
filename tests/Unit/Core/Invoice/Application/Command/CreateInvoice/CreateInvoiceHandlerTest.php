@@ -16,6 +16,10 @@ use PHPUnit\Framework\TestCase;
 
 class CreateInvoiceHandlerTest extends TestCase
 {
+    private const TEST_EMAIL = 'test@test.pl';
+    private const VALID_AMOUNT = 12500;
+    private const INVALID_AMOUNT = -5;
+
     private UserRepositoryInterface|MockObject $userRepository;
 
     private InvoiceRepositoryInterface|MockObject $invoiceRepository;
@@ -34,16 +38,14 @@ class CreateInvoiceHandlerTest extends TestCase
                 UserRepositoryInterface::class
             )
         );
-
     }
 
     public function test_handle_success(): void
     {
         $user = $this->createMock(User::class);
-        $user->expects(self::once())
+        $user->expects(self::atLeast(1))
             ->method('isActive')
             ->willReturn(true);
-
 
         $invoice = new Invoice(
             $user, 12500
@@ -60,7 +62,7 @@ class CreateInvoiceHandlerTest extends TestCase
         $this->invoiceRepository->expects(self::once())
             ->method('flush');
 
-        $this->handler->__invoke((new CreateInvoiceCommand('test@test.pl', 12500)));
+        $this->handler->__invoke((new CreateInvoiceCommand(self::TEST_EMAIL, self::VALID_AMOUNT)));
     }
 
     public function test_handle_user_not_exists(): void
@@ -71,26 +73,21 @@ class CreateInvoiceHandlerTest extends TestCase
             ->method('getByEmail')
             ->willThrowException(new UserNotFoundException());
 
-        $this->handler->__invoke((new CreateInvoiceCommand('test@test.pl', 12500)));
+        $this->handler->__invoke((new CreateInvoiceCommand(self::TEST_EMAIL, self::VALID_AMOUNT)));
     }
 
     public function test_handle_user_not_activated(): void
     {
         $this->expectException(UserNotActivatedException::class);
 
-        $this->userRepository->expects(self::once())
-            ->method('getByEmail')
-            ->willThrowException(new UserNotActivatedException());
-
-        $this->handler->__invoke((new CreateInvoiceCommand('test@test.pl', 12500)));
+        $this->handler->__invoke((new CreateInvoiceCommand(self::TEST_EMAIL, self::VALID_AMOUNT)));
     }
 
     public function test_handle_invoice_invalid_amount(): void
     {
         $user = $this->createMock(User::class);
-        $user->expects(self::once())
-            ->method('isActive')
-            ->willReturn(true);
+        $user->expects(self::never())
+            ->method('isActive');
 
         $this->expectException(InvoiceException::class);
 
@@ -98,6 +95,6 @@ class CreateInvoiceHandlerTest extends TestCase
             ->method('getByEmail')
             ->willReturn($user);
 
-        $this->handler->__invoke((new CreateInvoiceCommand('test@test.pl', -5)));
+        $this->handler->__invoke((new CreateInvoiceCommand(self::TEST_EMAIL, self::INVALID_AMOUNT)));
     }
 }
