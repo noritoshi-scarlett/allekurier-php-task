@@ -16,6 +16,7 @@ class DoctrineUserRepository implements UserRepositoryInterface
 
     /**
      * @throws NonUniqueResultException
+     * @throws UserNotFoundException
      */
     public function getByEmail(string $email): User
     {
