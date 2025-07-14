@@ -8,6 +8,10 @@ bin/console app:invoice:create user@example.com 12500
 
 # pobieranie identyfiaktorów faktur, które mają status "new" i ich kwota jest większa od 100,00 zł
 bin/console app:invoice:get-by-status-and-amount new 10000
+
+NOWA KOMENDA:
+# pobieranie adresów email nieaktywowanych użytkowników
+bin/console app:user:get-inactive
 ```
 
 ### Istniejące założenia biznesowe
